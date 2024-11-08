@@ -1,26 +1,68 @@
 pipeline {
-    agent { label 'java-agent' } // Specify your agent label
+    agent { label 'java-agent-1a2d5079' }  // This defines where the pipeline will run (any available agent)
+
+    environment {
+        // Define the Docker Hub credentials ID stored in Jenkins (you'll need to set this up)
+        DOCKER_CREDENTIALS = 'ea2b9534-f5ab-4172-8284-a88ab435bf2b'
+        DOCKER_IMAGE = 'hauhtc/spring-boot-2-hello-world'
+        TAG = ''  // Will be dynamically set based on commit ID
+        GIT_REPO = 'https://github.com/hauhuynh0301/Jenkins-Java-Slave.git' // Your GitHub repository URL
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/BuntyRaghani/spring-boot-hello-world.git'
+                // Checkout your repository from GitHub
+                git url: GIT_REPO, branch: 'main'  // Ensure you're pulling from the main branch or adjust as needed
             }
         }
-        stage('Build') {
+
+        stage('Get Commit ID') {
             steps {
-                sh 'mvn clean package' // Adjust if you use a different build tool
+                script {
+                    // Get the latest commit hash
+                    TAG = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    echo "Commit ID: ${TAG}"
+                }
             }
         }
-        stage('Archive Artifacts') {
+
+        stage('Build Docker Image') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                script {
+                    // Build Docker image and tag it with the commit ID
+                    sh "docker build -t ${DOCKER_IMAGE}:${TAG} ."
+                }
             }
         }
-        stage('Deploy') {
+
+        stage('Login to Docker Hub') {
             steps {
-                sh 'java -jar target/spring-boot-2-hello-world-1.0.2-SNAPSHOT.jar --server.port=7788'
-                //sh 'mvn spring-boot:run'
+                script {
+                    // Login to Docker Hub
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS, passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                    }
+                }
             }
+        }
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Push the Docker image to Docker Hub with the commit-based tag
+                    sh "docker push ${DOCKER_IMAGE}:${TAG}"
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Docker image pushed successfully to Docker Hub.'
+        }
+        failure {
+            echo 'There was an error pushing the Docker image.'
         }
     }
 }
