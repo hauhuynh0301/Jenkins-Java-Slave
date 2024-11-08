@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'java-agent-1a2d5079' }  // This defines where the pipeline will run (any available agent)
+    agent { label 'java-builder' }  // This defines where the pipeline will run (any available agent)
 
     environment {
         // Define the Docker Hub credentials ID stored in Jenkins (you'll need to set this up)
