@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres-container
+    environment:
+      - POSTGRES_USER=example_user
+      - POSTGRES_PASSWORD=example_password
+      - POSTGRES_DB=example_db
+    ports:
+      - "5432:5432"
+    networks:
+      - jenkins-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: spring-boot-app
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=example_db
+      - DB_USERNAME=example_user
+      - DB_PASSWORD=example_password
+    ports:
+      - "8085:8080"
+    depends_on:
+      - postgres
+    networks:
+      - jenkins-network
+
+networks:
+  jenkins-network:
+    driver: bridge
