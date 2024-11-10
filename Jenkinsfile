@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Define the Docker Hub credentials ID stored in Jenkins (you'll need to set this up)
-        DOCKER_CREDENTIALS = 'dckr_pat_4pUbmn6E_jyE7vK_Q16FW2Gk8EQ'
+        DOCKER_CREDENTIALS = 'docker_credentials'
         DOCKER_IMAGE = 'longn1/spring-boot-2-hello-world'
         TAG = ''  // Will be dynamically set based on commit ID
         GIT_REPO = 'https://github.com/hauhuynh0301/Jenkins-Java-Slave.git' // Your GitHub repository URL
