@@ -13,7 +13,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout your repository from GitHub
-                git url: GIT_REPO, branch: 'main'  // Ensure you're pulling from the main branch or adjust as needed
+                git url: GIT_REPO, branch: 'master'  // Ensure you're pulling from the main branch or adjust as needed
             }
         }
 
