@@ -51,6 +51,7 @@ pipeline {
             steps {
                 script {
                     // Push the Docker image to Docker Hub with the commit-based tag
+                    sh "docker tag ${DOCKER_IMAGE}:${TAG}"
                     sh "docker push ${DOCKER_IMAGE}:${TAG}"
                 }
             }
